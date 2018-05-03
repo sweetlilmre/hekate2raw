@@ -35,8 +35,9 @@ namespace hekate2raw
       outFile.Seek(seek * bs, SeekOrigin.Begin);
       for (int i = 0; i < count; i++)
       {
-        int read = inFile.Read(buffer, 0, bs);
-        outFile.Write(buffer, 0, read);
+        Array.Clear(buffer, 0, bs);
+        inFile.Read(buffer, 0, bs);
+        outFile.Write(buffer, 0, bs);
         Console.WriteLine("{0}%", i*100 / count);
         Console.CursorLeft = left;
         Console.CursorTop = top;
@@ -88,9 +89,12 @@ namespace hekate2raw
 
         long userStartSeek = 171520;
         long userCurrSeek = userStartSeek;
+        long fileSizeInBlocks = 0;
         if (File.Exists("USER"))
         {
-          Prep(outFile, "USER", 0, 171520, 1703936, 16384);
+          fileSizeInBlocks = 1703936;
+          Prep(outFile, "USER", 0, userCurrSeek, fileSizeInBlocks, 16384);
+          userCurrSeek += fileSizeInBlocks;
         }
         else
         {
@@ -98,7 +102,7 @@ namespace hekate2raw
           string fileName = string.Format("USER.{0}", i);
           while (File.Exists(fileName))
           {
-            long fileSizeInBlocks = new FileInfo(fileName).Length / 16384;
+            fileSizeInBlocks = new FileInfo(fileName).Length / 16384;
             Prep(outFile, fileName, 0, userCurrSeek, fileSizeInBlocks, 16384);
             userCurrSeek = userCurrSeek + fileSizeInBlocks;
             i++;
